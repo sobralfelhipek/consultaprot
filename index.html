@@ -218,29 +218,32 @@
   <div class="faixa-gradiente"></div>
 
   <main>
-    <h1>Consulta de Veículos</h1>
+  <h1>Consulta de Veículos</h1>
+
+  <div id="buscaContainer">
     <input type="text" id="busca" placeholder="Digite o modelo do veículo (ex: Voyage 2015)" />
     <button onclick="buscar()">Buscar</button>
+  </div>
 
-    <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-      <button id="novaBuscaBtn" class="nova-busca" onclick="novaBusca()">Nova busca</button>
-    </div>
+  <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+    <button id="novaBuscaBtn" class="nova-busca" onclick="novaBusca()">Nova busca</button>
+  </div>
 
-    <!-- ALERTAS -->
-    <div id="alertaInfo" class="alerta alerta-info">
-      ⚠️ <b>Alerta informativo:</b><br>
-      Não trabalhamos com carro a diesel.<br>
-      Em caso de carro reserva, <b>INFORMAR acréscimo de R$20,00</b> na parcela mensal.
-    </div>
+  <!-- ALERTAS -->
+  <div id="alertaInfo" class="alerta alerta-info">
+    ⚠️ <b>Informativos:</b><br>
+    Não trabalhamos com carro a diesel.<br>
+    Em caso de carro reserva, <b>INFORMAR acréscimo de R$20,00</b> na parcela mensal.
+  </div>
 
-    <div id="alertaCritico" class="alerta alerta-critico">
-      🚫 <b>Alerta crítico:</b><br>
-      O serviço de rastreamento é incluso para veículos tabela FIPE acima de 30 mil, mediante análise interna e não deve ser cobrado separadamente.
-    </div>
+  <div id="alertaCritico" class="alerta alerta-critico">
+    🚫 <b>Atenção:</b><br>
+    O serviço de rastreamento é incluso para veículos tabela FIPE acima de 30 mil, mediante análise interna e não deve ser cobrado separadamente.
+  </div>
 
-    <!-- RESULTADOS -->
-    <div id="resultado"></div>
-  </main>
+  <!-- RESULTADOS -->
+  <div id="resultado"></div>
+</main>
 
   <script>
     const url = "https://script.google.com/macros/s/AKfycbzxgVJUCfSk2r_Ts6OUCt68JsNVw8FjRzyfBKuVH6cznamz2HretWnHV4gCOR86OkAO/exec?busca=";
@@ -251,89 +254,95 @@
         .toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
 
-    async function buscar() {
-      const termo = document.getElementById("busca").value.trim();
-      const divResultado = document.getElementById("resultado");
-      const alertaInfo = document.getElementById("alertaInfo");
-      const alertaCritico = document.getElementById("alertaCritico");
-      const novaBuscaBtn = document.getElementById("novaBuscaBtn");
+async function buscar() {
+  const termo = document.getElementById("busca").value.trim();
+  const divResultado = document.getElementById("resultado");
+  const alertaInfo = document.getElementById("alertaInfo");
+  const alertaCritico = document.getElementById("alertaCritico");
+  const novaBuscaBtn = document.getElementById("novaBuscaBtn");
+  const buscaContainer = document.getElementById("buscaContainer");
 
-      divResultado.innerHTML = "";
-      alertaInfo.style.display = "none";
-      alertaCritico.style.display = "none";
-      novaBuscaBtn.style.display = "none"; // oculta o botão no início
+  divResultado.innerHTML = "";
+  alertaInfo.style.display = "none";
+  alertaCritico.style.display = "none";
+  novaBuscaBtn.style.display = "none";
 
-      if (!termo) {
-        divResultado.innerHTML = "<p class='nenhum-resultado'>Digite algo para buscar.</p>";
-        return;
-      }
+  if (!termo) {
+    divResultado.innerHTML = "<p class='nenhum-resultado'>Digite algo para buscar.</p>";
+    return;
+  }
 
-      divResultado.innerHTML = `
-        <div style="text-align:center; padding:20px;">
-          <div class="loader"></div>
-          <p>Buscando informações, aguarde...</p>
-        </div>
-      `;
+  // esconde a busca
+  buscaContainer.style.display = "none";
 
-      try {
-        const resposta = await fetch(url + encodeURIComponent(termo));
-        const data = await resposta.json();
+  divResultado.innerHTML = `
+    <div style="text-align:center; padding:20px;">
+      <div class="loader"></div>
+      <p>Buscando informações, aguarde...</p>
+    </div>
+  `;
 
-        if (data[0].erro) {
-          divResultado.innerHTML = `<p class='nenhum-resultado fade-in'>${data[0].erro}</p>`;
-          novaBuscaBtn.style.display = "block";
-          return;
-        }
+  try {
+    const resposta = await fetch(url + encodeURIComponent(termo));
+    const data = await resposta.json();
 
-        alertaInfo.style.display = "block";
-        alertaCritico.style.display = "block";
+    if (data[0].erro) {
+      divResultado.innerHTML = `<p class='nenhum-resultado fade-in'>${data[0].erro}</p>`;
+      novaBuscaBtn.style.display = "block";
+      return;
+    }
 
-        let tabela = `
-          <div class="fade-in">
-            <table>
-              <thead>
-                <tr>
-                  <th>VEÍCULO</th>
-                  <th>MENSALIDADE (R$)</th>
-                  <th>FRANQUIA (R$)</th>
-                  <th>MARCA</th>
-                  <th>TIPO</th>
-                </tr>
-              </thead>
-              <tbody>
-        `;
+    alertaInfo.style.display = "block";
+    alertaCritico.style.display = "block";
 
-        data.forEach(item => {
-          tabela += `
+    let tabela = `
+      <div class="fade-in">
+        <table>
+          <thead>
             <tr>
-              <td>${item.veiculo}</td>
-              <td>${formatarValor(item.mensalidade)}</td>
-              <td>${formatarValor(item.franquia)}</td>
-              <td>${item.marca}</td>
-              <td>${item.tipo}</td>
+              <th>VEÍCULO</th>
+              <th>MENSALIDADE (R$)</th>
+              <th>FRANQUIA (R$)</th>
+              <th>MARCA</th>
+              <th>TIPO</th>
             </tr>
-          `;
-        });
+          </thead>
+          <tbody>
+    `;
 
-        tabela += "</tbody></table></div>";
-        divResultado.innerHTML = tabela;
+    data.forEach(item => {
+      tabela += `
+        <tr>
+          <td>${item.veiculo}</td>
+          <td>${formatarValor(item.mensalidade)}</td>
+          <td>${formatarValor(item.franquia)}</td>
+          <td>${item.marca}</td>
+          <td>${item.tipo}</td>
+        </tr>
+      `;
+    });
 
-        novaBuscaBtn.style.display = "block"; // mostra o botão só após o resultado
+    tabela += "</tbody></table></div>";
+    divResultado.innerHTML = tabela;
 
-      } catch (erro) {
-        divResultado.innerHTML = `<p class='nenhum-resultado fade-in'>Erro ao buscar dados. Verifique a conexão.</p>`;
-        novaBuscaBtn.style.display = "block";
-      }
-    }
+    novaBuscaBtn.style.display = "block";
 
-    function novaBusca() {
-      document.getElementById("busca").value = "";
-      document.getElementById("resultado").innerHTML = "";
-      document.getElementById("alertaInfo").style.display = "none";
-      document.getElementById("alertaCritico").style.display = "none";
-      document.getElementById("novaBuscaBtn").style.display = "none";
-      document.getElementById("busca").focus();
-    }
+  } catch (erro) {
+    divResultado.innerHTML = `<p class='nenhum-resultado fade-in'>Erro ao buscar dados. Verifique a conexão.</p>`;
+    novaBuscaBtn.style.display = "block";
+  }
+}
+
+function novaBusca() {
+  document.getElementById("busca").value = "";
+  document.getElementById("resultado").innerHTML = "";
+  document.getElementById("alertaInfo").style.display = "none";
+  document.getElementById("alertaCritico").style.display = "none";
+  document.getElementById("novaBuscaBtn").style.display = "none";
+  document.getElementById("buscaContainer").style.display = "block";
+  document.getElementById("busca").focus();
+}
+
   </script>
 </body>
 </html>
