@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Consulta de Veículos</title>
+  <title>Consulta de Veículos - PROTERCAR</title>
 
   <style>
     /* ---------- GERAL ---------- */
@@ -18,17 +18,17 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: center;
       background: linear-gradient(180deg, #2b0000 0%, #4a0000 35%, #7a0000 60%, #9a0000 80%, #c70000 100%);
-      overflow: hidden;
+      overflow-x: hidden;
       color: #ffdd55;
     }
 
     /* ---------- GRADIENTE ANIMADO SOBREPOSTO ---------- */
     body::before {
       content: "";
-      position: absolute;
+      position: fixed;
       inset: 0;
       background: linear-gradient(-45deg, rgba(255, 0, 0, 0.6), rgba(255, 170, 0, 0.4), rgba(255, 0, 0, 0.6), rgba(255, 200, 0, 0.4));
       background-size: 400% 400%;
@@ -43,14 +43,34 @@
       100% { background-position: 0% 50%; }
     }
 
+    /* ---------- CABEÇALHO ---------- */
+    header {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      text-align: center;
+      padding: 25px 0 15px;
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(5px);
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.6);
+    }
+
+    header img {
+      width: 260px;
+      height: auto;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 0, 0.4));
+    }
+
+    /* ---------- CONTEÚDO PRINCIPAL ---------- */
     main {
       position: relative;
       z-index: 2;
       width: 90%;
       max-width: 900px;
-      padding: 30px;
+      padding: 35px 30px;
+      margin-top: 25px;
       border-radius: 20px;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.65);
       box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
@@ -152,7 +172,6 @@
       color: #ffbcbc;
     }
 
-    /* ---------- RESULTADO ---------- */
     .nenhum-resultado {
       color: #ffcb00;
       font-weight: bold;
@@ -187,11 +206,15 @@
 </head>
 
 <body>
+  <header>
+    <img src="PR Protercar2.png" alt="Logomarca Protercar">
+  </header>
+
   <main>
     <h1>Consulta de Veículos</h1>
 
     <div id="buscaContainer">
-      <input type="text" id="busca" placeholder="Digite o modelo do veículo (ex: Voyage 2015)" />
+      <input type="text" id="busca" placeholder="Digite o modelo do veículo (ex: Voyage 2015)">
       <button onclick="buscar()">Buscar</button>
     </div>
 
@@ -200,9 +223,9 @@
     </div>
 
     <div id="alertaInfo" class="alerta alerta-info">
-      ⚠️ <b>Informativos:</b><br>
-      Não trabalhamos com carro a diesel.<br>
-      Em caso de carro reserva, <b>INFORMAR acréscimo de R$20,00</b> na parcela mensal.
+      ⚠️ <b>Informativo:</b><br>
+      - Não trabalhamos com carro a diesel.<br>
+      - Em caso de carro reserva, <b>INFORMAR acréscimo de R$20,00</b> na mensalidade.
     </div>
 
     <div id="alertaCritico" class="alerta alerta-critico">
@@ -214,7 +237,7 @@
   </main>
 
   <script>
-    const url = "https://script.google.com/macros/s/AKfycby_qrBYcS7VjV_0iEvuTiWbXJdTszw5S2ktBkn9hEavlxG9oH5kFctfKhKMb-JjFFhC/exec?busca=";
+    const url = "https://script.google.com/macros/s/AKfycbxzsQWW99_JoAHoxiRm3uQXcOJ7tk8g1ueij2LUBEM2eXQdmrSf0a2Tp9IfadgH7_4E/exec?busca=";
 
     function formatarValor(valor) {
       if (!valor || isNaN(valor)) return valor;
