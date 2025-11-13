@@ -241,82 +241,93 @@
     const url = "https://script.google.com/macros/s/AKfycbxzsQWW99_JoAHoxiRm3uQXcOJ7tk8g1ueij2LUBEM2eXQdmrSf0a2Tp9IfadgH7_4E/exec?busca=";
 
     function formatarValor(valor) {
-      if (!valor || isNaN(valor)) return valor;
-      return parseFloat(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    if (!valor || isNaN(valor)) return valor;
+    return parseFloat(valor).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  async function buscar() {
+    const campoBusca = document.getElementById("busca");
+    const termo = campoBusca.value.trim();
+    const divResultado = document.getElementById("resultado");
+    const alertaInfo = document.getElementById("alertaInfo");
+    const alertaCritico = document.getElementById("alertaCritico");
+    const novaBuscaBtn = document.getElementById("novaBusca");
+    const btnBuscar = document.getElementById("btnBuscar");
+
+    divResultado.innerHTML = "";
+    alertaInfo.style.display = "none";
+    alertaCritico.style.display = "none";
+    novaBuscaBtn.style.display = "none";
+
+    if (!termo) {
+      divResultado.innerHTML = "<p class='nenhum-resultado'>Digite algo para buscar.</p>";
+      return;
     }
 
-    async function buscar() {
-      const termo = document.getElementById("busca").value.trim();
-      const divResultado = document.getElementById("resultado");
-      const alertaInfo = document.getElementById("alertaInfo");
-      const alertaCritico = document.getElementById("alertaCritico");
-      const novaBuscaBtn = document.getElementById("novaBusca");
-      const btnBuscar = document.getElementById("btnBuscar");
+    try {
+      const resposta = await fetch(url + encodeURIComponent(termo));
+      const data = await resposta.json();
 
-      divResultado.innerHTML = "";
-      alertaInfo.style.display = "none";
-      alertaCritico.style.display = "none";
-      novaBuscaBtn.style.display = "none";
+      if (data[0].erro) {
+        divResultado.innerHTML = `<p class='nenhum-resultado'>${data[0].erro}</p>`;
+      } else {
+        alertaInfo.style.display = "block";
+        alertaCritico.style.display = "block";
+        novaBuscaBtn.style.display = "block";
 
-      if (!termo) {
-        divResultado.innerHTML = "<p class='nenhum-resultado'>Digite algo para buscar.</p>";
-        return;
-      }
+        // Oculta o campo de busca e o botão "Buscar"
+        campoBusca.style.display = "none";
+        btnBuscar.style.display = "none";
 
-      try {
-        const resposta = await fetch(url + encodeURIComponent(termo));
-        const data = await resposta.json();
-
-        if (data[0].erro) {
-          divResultado.innerHTML = `<p class='nenhum-resultado'>${data[0].erro}</p>`;
-        } else {
-          alertaInfo.style.display = "block";
-          alertaCritico.style.display = "block";
-          novaBuscaBtn.style.display = "block";
-          btnBuscar.style.display = "none";
-
-          let tabela = `
-            <table>
-              <thead>
-                <tr>
-                  <th>VEÍCULO</th>
-                  <th>MENSALIDADE (R$)</th>
-                  <th>FRANQUIA (R$)</th>
-                  <th>MARCA</th>
-                  <th>TIPO</th>
-                </tr>
-              </thead>
-              <tbody>
-          `;
-
-          data.forEach(item => {
-            tabela += `
+        let tabela = `
+          <table>
+            <thead>
               <tr>
-                <td>${item.veiculo}</td>
-                <td>${formatarValor(item.mensalidade)}</td>
-                <td>${formatarValor(item.franquia)}</td>
-                <td>${item.marca}</td>
-                <td>${item.tipo}</td>
+                <th>VEÍCULO</th>
+                <th>MENSALIDADE (R$)</th>
+                <th>FRANQUIA (R$)</th>
+                <th>MARCA</th>
+                <th>TIPO</th>
               </tr>
-            `;
-          });
+            </thead>
+            <tbody>
+        `;
 
-          tabela += "</tbody></table>";
-          divResultado.innerHTML = tabela;
-        }
-      } catch (erro) {
-        divResultado.innerHTML = `<p class='nenhum-resultado'>Erro ao buscar dados. Verifique a conexão.</p>`;
+        data.forEach(item => {
+          tabela += `
+            <tr>
+              <td>${item.veiculo}</td>
+              <td>${formatarValor(item.mensalidade)}</td>
+              <td>${formatarValor(item.franquia)}</td>
+              <td>${item.marca}</td>
+              <td>${item.tipo}</td>
+            </tr>
+          `;
+        });
+
+        tabela += "</tbody></table>";
+        divResultado.innerHTML = tabela;
       }
+    } catch (erro) {
+      divResultado.innerHTML = `<p class='nenhum-resultado'>Erro ao buscar dados. Verifique a conexão.</p>`;
     }
+  }
 
-    function novaBusca() {
-      document.getElementById("busca").value = "";
-      document.getElementById("resultado").innerHTML = "";
-      document.getElementById("alertaInfo").style.display = "none";
-      document.getElementById("alertaCritico").style.display = "none";
-      document.getElementById("novaBusca").style.display = "none";
-      document.getElementById("btnBuscar").style.display = "block";
-    }
-  </script>
+  function novaBusca() {
+    const campoBusca = document.getElementById("busca");
+    const btnBuscar = document.getElementById("btnBuscar");
+    const novaBuscaBtn = document.getElementById("novaBusca");
+
+    campoBusca.value = "";
+    document.getElementById("resultado").innerHTML = "";
+    document.getElementById("alertaInfo").style.display = "none";
+    document.getElementById("alertaCritico").style.display = "none";
+
+    // Reexibe o campo de busca e botão "Buscar"
+    campoBusca.style.display = "block";
+    btnBuscar.style.display = "block";
+    novaBuscaBtn.style.display = "none";
+  }
+</script>
 </body>
 </html>
