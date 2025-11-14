@@ -1,207 +1,427 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PROTERCAR - Consulta de Veículos</title>
-
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to bottom, #ffffff, #ff4d4d);
-            color: #ffd54a;
-            min-height: 100vh;
-        }
-
-        header {
-            width: 100%;
-            padding: 25px 0;
-            background: linear-gradient(to bottom, #ffffff, #ff9999);
-            text-align: center;
-        }
-
-        header img {
-            width: 220px;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-        }
-
-        #buscaContainer {
-            margin-top: 20px;
-        }
-
-        #busca {
-            width: 80%;
-            padding: 15px;
-            border-radius: 10px;
-            border: none;
-            font-size: 18px;
-        }
-
-        button {
-            margin-top: 15px;
-            padding: 15px 25px;
-            font-size: 18px;
-            border: none;
-            border-radius: 10px;
-            background: #ffcc00;
-            color: #000;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        #novaBuscaBtn {
-            display: none;
-            margin-bottom: 25px;
-        }
-
-        .resultados {
-            margin-top: 20px;
-        }
-
-        .item {
-            background: rgba(0,0,0,0.25);
-            padding: 20px;
-            margin-bottom: 15px;
-            border-radius: 12px;
-            text-align: left;
-        }
-
-        .item strong {
-            color: #ffffff;
-        }
-
-        .toggle-franquia {
-            background: #ffcc00;
-            color: #000;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            display: inline-block;
-            margin-top: 5px;
-        }
-
-        .compartilhar {
-            background: #00e676;
-            color: #000;
-            margin-top: 10px;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
-            color: #fff;
-            font-size: 14px;
-        }
-
-        @media (max-width: 600px) {
-            #busca {
-                width: 95%;
-            }
-            .item {
-                font-size: 16px;
-            }
-        }
-    </style>
-</head>
-<body>
-
-<header>
-    <img src="logo.png" alt="PROTERCAR">
-</header>
-
-<div class="container">
-
-    <div id="buscaContainer">
-        <input type="text" id="busca" placeholder="Digite o veículo...">
-        <br>
-        <button onclick="buscar()">Buscar</button>
-    </div>
-
-    <button id="novaBuscaBtn" onclick="novaBusca()">Nova Busca</button>
-
-    <div id="resultados" class="resultados"></div>
-
-</div>
-
-<footer>
-    © Desenvolvido por Felhipe Sobral<br>2025 - Todos os direitos reservados ©
-</footer>
-
-<script>
-const API_URL = "https://script.google.com/macros/s/AKfycbxzsQWW99_JoAHoxiRm3uQXcOJ7tk8g1ueij2LUBEM2eXQdmrSf0a2Tp9IfadgH7_4E/exec?busca=";
-
-function formatarValor(v) {
-    return parseFloat(v).toFixed(2).replace('.', ',');
-}
-
-function buscar() {
-    const termo = document.getElementById("busca").value.trim();
-    if (!termo) return;
-
-    fetch(API_URL + encodeURIComponent(termo))
-        .then(r => r.json())
-        .then(dados => mostrarResultados(dados));
-
-    document.getElementById("novaBuscaBtn").style.display = "block";
-    document.getElementById("buscaContainer").style.display = "none";
-}
-
-function novaBusca() {
-    document.getElementById("busca").value = "";
-    document.getElementById("resultados").innerHTML = "";
-    document.getElementById("buscaContainer").style.display = "block";
-    document.getElementById("novaBuscaBtn").style.display = "none";
-}
-
-function mostrarResultados(lista) {
-    const div = document.getElementById("resultados");
-    div.innerHTML = "";
-
-    if (lista.length === 0 || lista[0].erro) {
-        div.innerHTML = "<p>Nenhum veículo encontrado.</p>";
-        return;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Consulta de Veículos</title>
+  <style>
+    /* ======= ESTILO GERAL ======= */
+    body {
+      font-family: "Segoe UI", Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to bottom, #ffffff 0%, #ff2a2a 35%, #990000 100%);
+      color: #ffdd55;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    lista.forEach(item => {
-        const icone = item.tipo.toLowerCase() === "carro" ? "🚗" : item.tipo.toLowerCase() === "moto" ? "🏍️" : "";
+    header {
+      background: linear-gradient(to bottom, #ffffff 0%, #ffdddd 100%);
+      text-align: center;
+      padding: 30px 10px 15px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
 
-        let bloco = document.createElement("div");
-        bloco.className = "item";
-        bloco.innerHTML = `
-            <strong>${icone} ${item.veiculo}</strong><br>
-            Mensalidade: R$ ${formatarValor(item.mensalidade)}<br><br>
-            Marca: ${item.marca}<br>
-            Tipo: ${item.tipo}<br><br>
-            <span class="toggle-franquia" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">Mostrar Franquia</span>
-            <div style="display:none; margin-top:8px;">Franquia: R$ ${formatarValor(item.franquia)}</div>
-            <button class="compartilhar" onclick='compartilharWhatsApp(${JSON.stringify(item)})'>Compartilhar no WhatsApp</button>
+    header img {
+      max-width: 280px;
+      height: auto;
+    }
+
+    main {
+      flex: 1;
+      max-width: 900px;
+      margin: 30px auto;
+      background: rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(6px);
+      padding: 30px;
+      border-radius: 14px;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      margin-bottom: 25px;
+      font-size: 1.8rem;
+    }
+
+    .search-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    input#busca {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #ff2a2a;
+      color: #fff;
+      border: none;
+      padding: 12px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.15s ease;
+    }
+
+    button:hover { transform: translateY(-2px); }
+
+    #novaBusca {
+      display: none;
+      background-color: #ffaa00;
+      color: #000;
+      margin-top: 15px;
+      width: auto;
+    }
+
+    .alerta {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .alerta-info {
+      background-color: rgba(255, 255, 255, 0.15);
+      color: #000;
+      border: 1px solid rgba(255, 230, 200, 0.7);
+    }
+
+    .alerta-critico {
+      background-color: rgba(255, 200, 200, 0.15);
+      color: #000;
+      border: 1px solid rgba(255, 150, 150, 0.7);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      color: #fff;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      vertical-align: middle;
+    }
+
+    td:first-child, th:first-child {
+      text-align: left;
+      padding-left: 20px;
+    }
+
+    th {
+      background-color: rgba(255, 0, 0, 0.75);
+      color: #fff;
+    }
+
+    td {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .share-icon-btn {
+      background: transparent;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 6px 8px;
+    }
+
+    .toggle-franquia-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #ffd700;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Cards mobile */
+    .card {
+      display: none;
+      background: rgba(0,0,0,0.45);
+      padding: 14px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .card .card-title { font-weight: 700; color: #ffd700; margin-bottom: 8px; }
+    .card p { margin: 6px 0; }
+
+    .card .btn-row { display:flex; gap:8px; margin-top:10px; align-items:center; }
+    .card .btn-row button { padding:8px 10px; border-radius:8px; font-weight:600; }
+    .card .btn-whatsapp { background:#25D366; color:#fff; border:none; }
+    .card .btn-toggle { background:transparent; border:1px solid rgba(255,255,255,0.08); color:#ffd700; }
+
+    .nenhum-resultado { text-align:center; color:#ffdd55; margin-top:20px; font-style:italic; }
+
+    footer {
+      text-align: center;
+      color: #ffdd55;
+      padding: 20px 10px;
+      font-size: 0.9rem;
+      background: linear-gradient(to top, rgba(255, 0, 0, 0.2), transparent);
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      margin-top: 30px;
+    }
+
+    /* MOBILE RESPONSIVE BEHAVIOR */
+    @media (max-width: 768px) {
+      table { display: none; }
+      .card { display: block; }
+      .search-row { flex-direction: column; }
+      input#busca { width: 100%; }
+      #novaBusca { align-self: flex-end; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <img src="PR23.png" alt="Logomarca" />
+  </header>
+
+  <main>
+    <h1>Consulta de Veículos</h1>
+
+    <div class="search-row" id="searchContainer">
+      <input type="text" id="busca" placeholder="Veículo Ano (ex: Argo 2010 ou Biz 2018)" />
+      <button id="btnBuscar" onclick="buscar()">Buscar</button>
+    </div>
+
+    <div style="display:flex; justify-content: flex-end;">
+      <button id="novaBusca" onclick="novaBusca()">🔄 Nova busca</button>
+    </div>
+
+    <!-- ALERTAS -->
+    <div id="alertaInfo" class="alerta alerta-info">
+      ⚠️ <b>Informativo:</b><br>
+      Não trabalhamos com carro a diesel.
+        <br>
+        <br>
+      Em caso de carro reserva, <b>INFORMAR acréscimo de R$20,00</b> na parcela mensal.
+    </div>
+
+    <div id="alertaCritico" class="alerta alerta-critico">
+      🚫 <b>Observação:</b><br>
+      O serviço de rastreamento é incluso para veículos com tabela FIPE acima de 30 mil, mediante análise interna e não deve ser cobrado separadamente.
+    </div>
+
+    <!-- RESULTADOS -->
+    <div id="resultado"></div>
+  </main>
+
+  <footer>
+    © Desenvolvido por <strong>Felhipe Sobral</strong><br>
+    2025 - Todos os direitos reservados ©
+  </footer>
+
+  <script>
+    const url = "https://script.google.com/macros/s/AKfycbxzsQWW99_JoAHoxiRm3uQXcOJ7tk8g1ueij2LUBEM2eXQdmrSf0a2Tp9IfadgH7_4E/exec?busca=";
+
+    function formatarValor(valor) {
+      if (valor === null || valor === undefined || valor === "") return "";
+      const n = Number(String(valor).replace(/[^\d,-\.]/g, "").replace(",", "."));
+      if (isNaN(n)) return valor;
+      return n.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    // Toggle franquia tanto em desktop (fdesk-INDEX) quanto em mobile (franquia-INDEX)
+    function toggleFranquia(index) {
+      const elDesk = document.getElementById(`fdesk-${index}`);
+      const elCard = document.getElementById(`franquia-${index}`);
+      const btnDesk = document.getElementById(`toggle-desk-${index}`);
+      const btnCard = document.getElementById(`toggle-card-${index}`);
+
+      const currentlyHidden = (elCard && elCard.dataset && elCard.dataset.visible === "false") || (elDesk && elDesk.dataset && elDesk.dataset.visible === "false");
+
+      if (elDesk) {
+        if (currentlyHidden) {
+          elDesk.innerText = `R$ ${formatarValor(elDesk.dataset.real)}`;
+          elDesk.dataset.visible = "true";
+          if (btnDesk) btnDesk.innerText = "Ocultar";
+        } else {
+          elDesk.innerText = "••••••";
+          elDesk.dataset.visible = "false";
+          if (btnDesk) btnDesk.innerText = "Mostrar";
+        }
+      }
+
+      if (elCard) {
+        if (currentlyHidden) {
+          elCard.innerText = `R$ ${formatarValor(elCard.dataset.real)}`;
+          elCard.dataset.visible = "true";
+          if (btnCard) btnCard.innerText = "👁️ Ocultar";
+        } else {
+          elCard.innerText = "••••••";
+          elCard.dataset.visible = "false";
+          if (btnCard) btnCard.innerText = "👁️ Mostrar";
+        }
+      }
+    }
+
+    function compartilharWhatsApp(item) {
+      const tipo = (item.tipo || "").toString().toLowerCase();
+      const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
+      const msg =
+`${icone} ${item.veiculo}
+Mensalidade: R$ ${formatarValor(item.mensalidade)}
+
+Marca: ${item.marca}
+Tipo: ${item.tipo}
+
+Consulta realizada no sistema PROTERCAR.`;
+      const link = "https://wa.me/?text=" + encodeURIComponent(msg);
+      window.open(link, "_blank");
+    }
+
+    async function buscar() {
+      const campoBusca = document.getElementById("busca");
+      const termoRaw = campoBusca.value || "";
+      const termo = termoRaw.trim().replace(/\s+/g, " ");
+      const divResultado = document.getElementById("resultado");
+      const alertaInfo = document.getElementById("alertaInfo");
+      const alertaCritico = document.getElementById("alertaCritico");
+      const novaBuscaBtn = document.getElementById("novaBusca");
+      const btnBuscar = document.getElementById("btnBuscar");
+      const searchContainer = document.getElementById("searchContainer");
+
+      divResultado.innerHTML = "";
+      alertaInfo.style.display = "none";
+      alertaCritico.style.display = "none";
+      novaBuscaBtn.style.display = "none";
+
+      if (!termo) {
+        divResultado.innerHTML = "<p class='nenhum-resultado'>Digite algo para buscar.</p>";
+        return;
+      }
+
+      // show loader
+      divResultado.innerHTML = `<div style="text-align:center; padding:18px;"><div style="display:inline-block; width:36px; height:36px; border-radius:50%; border:4px solid rgba(255,255,255,0.15); border-left-color:#ffd54a; animation:spin 1s linear infinite;"></div><p style="margin-top:8px;">Buscando...</p></div>`;
+
+      try {
+        const resposta = await fetch(url + encodeURIComponent(termo));
+        const data = await resposta.json();
+
+        if (!data || data.length === 0 || data[0].erro) {
+          divResultado.innerHTML = `<p class='nenhum-resultado'>${data && data[0] && data[0].erro ? data[0].erro : 'Nenhum veículo encontrado.'}</p>`;
+          // show nova busca button so user can try again
+          novaBuscaBtn.style.display = "block";
+          return;
+        }
+
+        // show alerts and novaBusca
+        alertaInfo.style.display = "block";
+        alertaCritico.style.display = "block";
+        novaBuscaBtn.style.display = "block";
+
+        // hide search input and buscar button (as requested)
+        searchContainer.style.display = "none";
+
+        // build table (desktop)
+        let tabela = `
+          <table>
+            <thead>
+              <tr>
+                <th>VEÍCULO</th>
+                <th>MENSALIDADE (R$)</th>
+                <th>FRANQUIA (R$)</th>
+                <th>MARCA</th>
+                <th>TIPO</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
         `;
-        div.appendChild(bloco);
-    });
-}
 
-function compartilharWhatsApp(item) {
-    const icone = item.tipo.toLowerCase() === "carro" ? "🚗" : item.tipo.toLowerCase() === "moto" ? "🏍️" : "";
+        // build cards (mobile)
+        let cards = "";
 
-    const msg = `${icone} *${item.veiculo}*
-Mensalidade: *R$ ${formatarValor(item.mensalidade)}*
+        data.forEach((item, idx) => {
+          // ensure safe strings
+          const veiculo = item.veiculo || "";
+          const mensalidade = item.mensalidade || "";
+          const franquia = item.franquia || "";
+          const marca = item.marca || "";
+          const tipo = item.tipo || "";
 
-Marca: *${item.marca}*
-Tipo: *${item.tipo}*`;
+          const emoji = (tipo.toString().toLowerCase() === "carro") ? "🚗" : (tipo.toString().toLowerCase() === "moto") ? "🏍️" : "";
 
-    const url = "https://wa.me/?text=" + encodeURIComponent(msg);
-    window.open(url, "_blank");
-}
-</script>
+          // table row with share icon (🟢) and hidden franquia
+          tabela += `
+            <tr>
+              <td>${emoji} ${veiculo}</td>
+              <td>R$ ${formatarValor(mensalidade)}</td>
+              <td><span id="fdesk-${idx}" data-real="${franquia}" data-visible="false">••••••</span>
+                  <button id="toggle-desk-${idx}" class="toggle-franquia-btn" onclick="toggleFranquia(${idx})">Mostrar</button>
+              </td>
+              <td>${marca}</td>
+              <td>${tipo}</td>
+              <td><button class="share-icon-btn" title="Compartilhar" onclick='compartilharWhatsApp(${JSON.stringify(item).replaceAll("'", "\\'")})'>🟢</button></td>
+            </tr>
+          `;
 
+          // mobile card
+          cards += `
+            <div class="card" id="card-${idx}">
+              <div class="card-title">${emoji} ${veiculo}</div>
+              <p><strong>Mensalidade:</strong> R$ ${formatarValor(mensalidade)}</p>
+              <p><strong>Franquia:</strong> <span id="franquia-${idx}" data-real="${franquia}" data-visible="false">••••••</span></p>
+              <p><strong>Marca:</strong> ${marca}</p>
+              <p><strong>Tipo:</strong> ${tipo}</p>
+              <div class="btn-row">
+                <button id="toggle-card-${idx}" class="btn-toggle" onclick="toggleFranquia(${idx})">👁️ Mostrar</button>
+                <button class="btn-whatsapp btn-whatsapp-mobile" onclick='compartilharWhatsApp(${JSON.stringify(item).replaceAll("'", "\\'")})'>🟢</button>
+              </div>
+            </div>
+          `;
+        });
+
+        tabela += `</tbody></table>`;
+
+        // render both (CSS will hide table on mobile and show cards)
+        divResultado.innerHTML = tabela + cards;
+
+      } catch (erro) {
+        console.error(erro);
+        divResultado.innerHTML = `<p class='nenhum-resultado'>Erro ao buscar dados. Verifique a conexão.</p>`;
+        document.getElementById("novaBusca").style.display = "block";
+      }
+    }
+
+    function novaBusca() {
+      const campoBusca = document.getElementById("busca");
+      const novaBtn = document.getElementById("novaBusca");
+      document.getElementById("resultado").innerHTML = "";
+      document.getElementById("alertaInfo").style.display = "none";
+      document.getElementById("alertaCritico").style.display = "none";
+      // re-show search
+      document.getElementById("searchContainer").style.display = "flex";
+      novaBtn.style.display = "none";
+      campoBusca.value = "";
+      campoBusca.focus();
+    }
+
+    // small spinner css injection for loader animation
+    (function addSpinnerKeyframes(){
+      const style = document.createElement('style');
+      style.textContent = `@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}`;
+      document.head.appendChild(style);
+    })();
+  </script>
 </body>
 </html>
