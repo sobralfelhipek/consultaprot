@@ -289,13 +289,15 @@ function compartilharWhatsApp(item) {
   const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
 
   const msg =
-`${icone} ${item.veiculo}
-Mensalidade: R$ ${formatarValor(item.mensalidade)}
-
-Marca: ${item.marca}
-Tipo: ${item.tipo}
-
-Consulta realizada no dia ${dataHora}`;
+`${icone}
+${item.veiculo}
+-----------------------
+<b>Mensalidade:<b> R$ ${formatarValor(item.mensalidade)}
+<b>Marca:<b> ${item.marca}
+<b>Tipo:<b> ${item.tipo}
+-----------------------
+Consulta realizada no dia:
+${dataHora}`;
 
   const link = "https://wa.me/?text=" + encodeURIComponent(msg);
   window.open(link, "_blank");
