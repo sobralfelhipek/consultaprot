@@ -304,17 +304,17 @@
       }
     }
     
-<img id="imgCarro" src="./PRCARRO.jpg" hidden>
-<img id="imgMoto" src="./PRMOTO.jpg" hidden>
-  
 async function compartilharWhatsApp(item) {
   const tipo = (item.tipo || "").toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
-  // DEFININDO IMAGEM
-  const imgElement = document.getElementById(tipo === "carro" ? "imgCarro" : "imgMoto");
+  // Caminhos das imagens hospedadas no mesmo local do seu site
+  const imgCarro = "./PRCARRO.jpg";
+  const imgMoto  = "./PRMOTO.jpg";
 
-  // GERA DATA/HORA
+  const imagemFinal = tipo === "carro" ? imgCarro : imgMoto;
+
+  // Gera data/hora atual
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
   const mes = String(agora.getMonth() + 1).padStart(2, "0");
@@ -324,7 +324,8 @@ async function compartilharWhatsApp(item) {
 
   const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
 
-  const msg = `${icone}
+  const msg =
+`${icone}
 ${item.veiculo}
 -----------------------
 *Mensalidade:* R$ ${formatarValor(item.mensalidade)}
@@ -334,36 +335,33 @@ ${item.veiculo}
 Consulta realizada no dia:
 ${dataHora}`;
 
+
   /* ======================================================
-     1️⃣ ANDROID – Compartilhar imagem ANTES do texto
-     sem pop-up de permissão
+     1️⃣ TENTAR WEB SHARE API → Envio direto da imagem
+     (funciona em celulares Android/iOS)
      ====================================================== */
   try {
-    const canvas = document.createElement("canvas");
-    canvas.width = imgElement.naturalWidth;
-    canvas.height = imgElement.naturalHeight;
-
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(imgElement, 0, 0);
-
-    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.9));
-    const arquivo = new File([blob], "consulta.jpg", { type: "image/jpeg" });
+    const resposta = await fetch(imagemFinal);
+    const blob = await resposta.blob();
+    const arquivo = new File([blob], "compartilhamento.jpg", { type: blob.type });
 
     if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
       await navigator.share({
         files: [arquivo],
         text: msg
       });
-      return;
+      return; // sucesso → encerra aqui
     }
   } catch (e) {
-    console.warn("Compartilhamento direto falhou:", e);
+    console.warn("Falha no compartilhamento direto:", e);
   }
 
+
   /* ======================================================
-     2️⃣ DESKTOP → fallback automático
+     2️⃣ FALLBACK AUTOMÁTICO → WhatsApp Web (Desktop)
      ====================================================== */
-  const link = "https://wa.me/?text=" + encodeURIComponent(msg);
+  const msgComLink = msg + "\n\n" + window.location.origin + "/" + imagemFinal;
+  const link = "https://wa.me/?text=" + encodeURIComponent(msgComLink);
   window.open(link, "_blank");
 }
 
