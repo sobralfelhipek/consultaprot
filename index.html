@@ -308,6 +308,10 @@ function compartilharWhatsApp(item) {
   const tipo = (item.tipo || "").toString().toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
+  // URLs das imagens para cada tipo
+  const imgCarro = "https://seusite.com/imagens/carro.png"; // 🔁 coloque sua URL aqui
+  const imgMoto  = "https://seusite.com/imagens/moto.png";  // 🔁 coloque sua URL aqui
+
   // Gera data/hora atual
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
@@ -329,9 +333,18 @@ ${item.veiculo}
 Consulta realizada no dia:
 ${dataHora}`;
 
-  const link = "https://wa.me/?text=" + encodeURIComponent(msg);
+  // Escolher imagem correta
+  let imagemURL = "";
+  if (tipo === "carro") imagemURL = imgCarro;
+  if (tipo === "moto")  imagemURL = imgMoto;
+
+  // WhatsApp aceita imagem colocando a URL no final da mensagem
+  const mensagemCompleta = msg + "\n\n" + imagemURL;
+
+  const link = "https://wa.me/?text=" + encodeURIComponent(mensagemCompleta);
   window.open(link, "_blank");
 }
+
 
     async function buscar() {
       const campoBusca = document.getElementById("busca");
