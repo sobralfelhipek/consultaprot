@@ -304,13 +304,15 @@
       }
     }
 
-function compartilharWhatsApp(item) {
-  const tipo = (item.tipo || "").toString().toLowerCase();
+async function compartilharWhatsApp(item) {
+  const tipo = (item.tipo || "").toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
-  // URLs das imagens para cada tipo
-  const imgCarro = "https://raw.githubusercontent.com/sobralfelhipek/consultaprot/refs/heads/main/PRCARRO.jpg"; // 🔁 coloque sua URL aqui para a imagem do Carro
-  const imgMoto  = "https://raw.githubusercontent.com/sobralfelhipek/consultaprot/refs/heads/main/PRMOTO.jpg";  // 🔁 coloque sua URL aqui para a imagem da MOTO
+  // Caminhos das imagens hospedadas no mesmo local do seu site
+  const imgCarro = "./PRCARRO.jpg";
+  const imgMoto  = "./PRMOTO.jpg";
+
+  const imagemFinal = tipo === "carro" ? imgCarro : imgMoto;
 
   // Gera data/hora atual
   const agora = new Date();
@@ -333,15 +335,33 @@ ${item.veiculo}
 Consulta realizada no dia:
 ${dataHora}`;
 
-  // Escolher imagem correta
-  let imagemURL = "";
-  if (tipo === "carro") imagemURL = imgCarro;
-  if (tipo === "moto")  imagemURL = imgMoto;
 
-  // WhatsApp aceita imagem colocando a URL no final da mensagem
-  const mensagemCompleta = msg + "\n\n" + imagemURL;
+  /* ======================================================
+     1️⃣ TENTAR WEB SHARE API → Envio direto da imagem
+     (funciona em celulares Android/iOS)
+     ====================================================== */
+  try {
+    const resposta = await fetch(imagemFinal);
+    const blob = await resposta.blob();
+    const arquivo = new File([blob], "compartilhamento.jpg", { type: blob.type });
 
-  const link = "https://wa.me/?text=" + encodeURIComponent(mensagemCompleta);
+    if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
+      await navigator.share({
+        files: [arquivo],
+        text: msg
+      });
+      return; // sucesso → encerra aqui
+    }
+  } catch (e) {
+    console.warn("Falha no compartilhamento direto:", e);
+  }
+
+
+  /* ======================================================
+     2️⃣ FALLBACK AUTOMÁTICO → WhatsApp Web (Desktop)
+     ====================================================== */
+  const msgComLink = msg + "\n\n" + window.location.origin + "/" + imagemFinal;
+  const link = "https://wa.me/?text=" + encodeURIComponent(msgComLink);
   window.open(link, "_blank");
 }
 
