@@ -304,42 +304,69 @@
       }
     }
     
-function compartilharWhatsApp(item) {
+async function compartilharWhatsApp(item) {
+  const tipo = (item.tipo || "").toLowerCase();
 
-  // URLs públicas no GitHub (substitua pelos seus links reais)
+  // --- Escolher imagem conforme tipo ---
   const imgCarro = "https://raw.githubusercontent.com/sobralfelhipek/consultaprot/main/PRCARRO.jpg";
   const imgMoto  = "https://raw.githubusercontent.com/sobralfelhipek/consultaprot/main/PRMOTO.jpg";
 
-  const tipo = (item.tipo || "").toLowerCase();
-  const imagemURL = tipo === "carro" ? imgCarro : imgMoto;
+  const imageURL = tipo === "carro" ? imgCarro : imgMoto;
 
-  // Data e hora formatadas
+  // --- Formatador de data/hora ---
   const agora = new Date();
-  const dia = String(agora.getDate()).padStart(2, "0");
-  const mes = String(agora.getMonth() + 1).padStart(2, "0");
-  const ano = agora.getFullYear();
+  const dia  = String(agora.getDate()).padStart(2, "0");
+  const mes  = String(agora.getMonth() + 1).padStart(2, "0");
+  const ano  = agora.getFullYear();
   const hora = String(agora.getHours()).padStart(2, "0");
-  const min = String(agora.getMinutes()).padStart(2, "0");
+  const min  = String(agora.getMinutes()).padStart(2, "0");
 
-  const icone = tipo === "carro" ? "🚗" : "🏍️";
-
-  // WhatsApp EXIGE que a URL fique NA PRIMEIRA LINHA
-  const mensagem = 
-`${imagemURL}
-
-${icone} *${item.veiculo}*
+  // --- Mensagem final ---
+  const mensagem =
+`${tipo === "carro" ? "🚗" : "🏍️"} *${item.veiculo}*
 ------------------------
-*Mensalidade:* R$ ${formatarValor(item.mensalidade)}
-*Marca:* ${item.marca}
-*Tipo:* ${item.tipo}
+Mensalidade: R$ ${formatarValor(item.mensalidade)}
+Marca: ${item.marca}
+Tipo: ${item.tipo}
 ------------------------
 Consulta realizada em:
-${dia}/${mes}/${ano} às ${hora}:${min}
-`;
+${dia}/${mes}/${ano} às ${hora}:${min}`;
 
-  const linkWHATS = "https://wa.me/?text=" + encodeURIComponent(mensagem);
-  window.open(linkWHATS, "_blank");
+  // ---------------------------------------------------------------------------------------
+  // 🔵 1) TENTATIVA ANDROID (envio da imagem real via Web Share API)
+  // ---------------------------------------------------------------------------------------
+  try {
+    if (navigator.canShare) {
+      const response = await fetch(imageURL);
+      const blob = await response.blob();
+      const file = new File([blob], "imagem.jpg", { type: blob.type });
+
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          files: [file],
+          title: "Consulta PROTERCAR",
+          text: mensagem // legenda da imagem
+        });
+        return; // sucesso → encerra aqui
+      }
+    }
+  } catch (e) {
+    console.warn("Android share falhou → usando fallback.");
+  }
+
+  // ---------------------------------------------------------------------------------------
+  // 🔴 2) FALLBACK AUTOMÁTICO (iPhone ou navegador sem suporte a envio de imagem)
+  // ---------------------------------------------------------------------------------------
+  const mensagemFallback =
+    `${mensagem}\n\n` +
+    `🖼️ Imagem: ${imageURL}`;
+
+  const url =
+    "https://wa.me/?text=" + encodeURIComponent(mensagemFallback);
+
+  window.open(url, "_blank");
 }
+
     async function buscar() {
       const campoBusca = document.getElementById("busca");
       const termoRaw = campoBusca.value || "";
