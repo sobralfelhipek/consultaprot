@@ -303,18 +303,18 @@
         }
       }
     }
-
+    
+<img id="imgCarro" src="./PRCARRO.jpg" hidden>
+<img id="imgMoto" src="./PRMOTO.jpg" hidden>
+  
 async function compartilharWhatsApp(item) {
   const tipo = (item.tipo || "").toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
-  // Caminhos das imagens hospedadas no mesmo local do seu site
-  const imgCarro = "./PRCARRO.jpg";
-  const imgMoto  = "./PRMOTO.jpg";
+  // DEFININDO IMAGEM
+  const imgElement = document.getElementById(tipo === "carro" ? "imgCarro" : "imgMoto");
 
-  const imagemFinal = tipo === "carro" ? imgCarro : imgMoto;
-
-  // Gera data/hora atual
+  // GERA DATA/HORA
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
   const mes = String(agora.getMonth() + 1).padStart(2, "0");
@@ -324,8 +324,7 @@ async function compartilharWhatsApp(item) {
 
   const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
 
-  const msg =
-`${icone}
+  const msg = `${icone}
 ${item.veiculo}
 -----------------------
 *Mensalidade:* R$ ${formatarValor(item.mensalidade)}
@@ -335,36 +334,38 @@ ${item.veiculo}
 Consulta realizada no dia:
 ${dataHora}`;
 
-
   /* ======================================================
-     1️⃣ TENTAR WEB SHARE API → Envio direto da imagem
-     (funciona em celulares Android/iOS)
+     1️⃣ ANDROID – Compartilhar imagem ANTES do texto
+     sem pop-up de permissão
      ====================================================== */
   try {
-    const resposta = await fetch(imagemFinal);
-    const blob = await resposta.blob();
-    const arquivo = new File([blob], "compartilhamento.jpg", { type: blob.type });
+    const canvas = document.createElement("canvas");
+    canvas.width = imgElement.naturalWidth;
+    canvas.height = imgElement.naturalHeight;
+
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(imgElement, 0, 0);
+
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/jpeg", 0.9));
+    const arquivo = new File([blob], "consulta.jpg", { type: "image/jpeg" });
 
     if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
       await navigator.share({
         files: [arquivo],
         text: msg
       });
-      return; // sucesso → encerra aqui
+      return;
     }
   } catch (e) {
-    console.warn("Falha no compartilhamento direto:", e);
+    console.warn("Compartilhamento direto falhou:", e);
   }
 
-
   /* ======================================================
-     2️⃣ FALLBACK AUTOMÁTICO → WhatsApp Web (Desktop)
+     2️⃣ DESKTOP → fallback automático
      ====================================================== */
-  const msgComLink = msg + "\n\n" + window.location.origin + "/" + imagemFinal;
-  const link = "https://wa.me/?text=" + encodeURIComponent(msgComLink);
+  const link = "https://wa.me/?text=" + encodeURIComponent(msg);
   window.open(link, "_blank");
 }
-
 
     async function buscar() {
       const campoBusca = document.getElementById("busca");
