@@ -308,7 +308,6 @@ function compartilharWhatsApp(item) {
   const tipo = (item.tipo || "").toString().toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
-  // Gera data/hora atual
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
   const mes = String(agora.getMonth() + 1).padStart(2, "0");
@@ -317,6 +316,71 @@ function compartilharWhatsApp(item) {
   const min = String(agora.getMinutes()).padStart(2, "0");
 
   const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
+
+  const msg =
+`${icone}
+${item.veiculo}
+-----------------------
+*Mensalidade:* R$ ${formatarValor(item.mensalidade)}
+*Marca:* ${item.marca}
+*Tipo:* ${item.tipo}
+-----------------------
+Consulta realizada no dia:
+${dataHora}`;
+
+  const link = "https://wa.me/?text=" + encodeURIComponent(msg);
+  window.open(link, "_blank");
+}
+
+// ===== NOVA FUNÇÃO para copiar o mesmo texto =====
+function copiarTexto(item) {
+  const tipo = (item.tipo || "").toString().toLowerCase();
+  const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
+
+  const agora = new Date();
+  const dia = String(agora.getDate()).padStart(2, "0");
+  const mes = String(agora.getMonth() + 1).padStart(2, "0");
+  const ano = agora.getFullYear();
+  const hora = String(agora.getHours()).padStart(2, "0");
+  const min = String(agora.getMinutes()).padStart(2, "0");
+
+  const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
+
+  const texto = `${icone}
+${item.veiculo}
+-----------------------
+*Mensalidade:* R$ ${formatarValor(item.mensalidade)}
+*Marca:* ${item.marca}
+*Tipo:* ${item.tipo}
+-----------------------
+Consulta realizada no dia:
+${dataHora}`;
+
+  navigator.clipboard.writeText(texto).then(() => mostrarToast());
+}
+
+// ===== EFEITO VISUAL “COPIADO” =====
+function mostrarToast() {
+  const t = document.createElement('div');
+  t.innerText = "✔ Texto copiado!";
+  t.style.position = "fixed";
+  t.style.bottom = "25px";
+  t.style.right = "25px";
+  t.style.padding = "14px 18px";
+  t.style.background = "#25d366";
+  t.style.color = "white";
+  t.style.fontSize = "1rem";
+  t.style.borderRadius = "10px";
+  t.style.boxShadow = "0 4px 10px rgba(0,0,0,0.25)";
+  t.style.opacity = "0";
+  t.style.transition = "all .4s ease";
+  document.body.appendChild(t);
+
+  setTimeout(() => { t.style.opacity = "1"; }, 50);
+  setTimeout(() => { t.style.opacity = "0"; }, 1800);
+  setTimeout(() => { t.remove(); }, 2400);
+}
+/${mes}/${ano} - ${hora}:${min}`;
 
   const msg =
 `${icone}
