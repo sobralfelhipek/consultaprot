@@ -304,17 +304,16 @@
       }
     }
     
-async function compartilharWhatsApp(item) {
+function compartilharWhatsApp(item) {
+
+  // URLs públicas no GitHub (substitua pelos seus links reais)
+  const imgCarro = "https://raw.githubusercontent.com/sobralfelhipek/consultaprot/main/PRCARRO.jpg";
+  const imgMoto  = "https://raw.githubusercontent.com/sobralfelhipek/consultaprot/main/PRMOTO.jpg";
+
   const tipo = (item.tipo || "").toLowerCase();
-  const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
+  const imagemURL = tipo === "carro" ? imgCarro : imgMoto;
 
-  // Caminhos das imagens hospedadas no mesmo local do seu site
-  const imgCarro = "./PRCARRO.jpg";
-  const imgMoto  = "./PRMOTO.jpg";
-
-  const imagemFinal = tipo === "carro" ? imgCarro : imgMoto;
-
-  // Gera data/hora atual
+  // Data e hora formatadas
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
   const mes = String(agora.getMonth() + 1).padStart(2, "0");
@@ -322,49 +321,25 @@ async function compartilharWhatsApp(item) {
   const hora = String(agora.getHours()).padStart(2, "0");
   const min = String(agora.getMinutes()).padStart(2, "0");
 
-  const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
+  const icone = tipo === "carro" ? "🚗" : "🏍️";
 
-  const msg =
-`${icone}
-${item.veiculo}
------------------------
+  // WhatsApp EXIGE que a URL fique NA PRIMEIRA LINHA
+  const mensagem = 
+`${imagemURL}
+
+${icone} *${item.veiculo}*
+------------------------
 *Mensalidade:* R$ ${formatarValor(item.mensalidade)}
 *Marca:* ${item.marca}
 *Tipo:* ${item.tipo}
------------------------
-Consulta realizada no dia:
-${dataHora}`;
+------------------------
+Consulta realizada em:
+${dia}/${mes}/${ano} às ${hora}:${min}
+`;
 
-
-  /* ======================================================
-     1️⃣ TENTAR WEB SHARE API → Envio direto da imagem
-     (funciona em celulares Android/iOS)
-     ====================================================== */
-  try {
-    const resposta = await fetch(imagemFinal);
-    const blob = await resposta.blob();
-    const arquivo = new File([blob], "compartilhamento.jpg", { type: blob.type });
-
-    if (navigator.canShare && navigator.canShare({ files: [arquivo] })) {
-      await navigator.share({
-        files: [arquivo],
-        text: msg
-      });
-      return; // sucesso → encerra aqui
-    }
-  } catch (e) {
-    console.warn("Falha no compartilhamento direto:", e);
-  }
-
-
-  /* ======================================================
-     2️⃣ FALLBACK AUTOMÁTICO → WhatsApp Web (Desktop)
-     ====================================================== */
-  const msgComLink = msg + "\n\n" + window.location.origin + "/" + imagemFinal;
-  const link = "https://wa.me/?text=" + encodeURIComponent(msgComLink);
-  window.open(link, "_blank");
+  const linkWHATS = "https://wa.me/?text=" + encodeURIComponent(mensagem);
+  window.open(linkWHATS, "_blank");
 }
-
     async function buscar() {
       const campoBusca = document.getElementById("busca");
       const termoRaw = campoBusca.value || "";
