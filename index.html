@@ -308,8 +308,9 @@ function compartilharWhatsApp(item, botao = null) {
   const tipo = (item.tipo || "").toString().toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
-  // pega o valor preenchido no card (se houver)
   let valorPersonalizado = "";
+
+  // → VERIFICA SE O BOTÃO É DO CARD (MOBILE)
   if (botao) {
     const card = botao.closest(".card");
     if (card) {
@@ -318,8 +319,18 @@ function compartilharWhatsApp(item, botao = null) {
         valorPersonalizado = inputValor.value.trim();
       }
     }
+
+    // → VERIFICA SE O BOTÃO É DA TABELA (DESKTOP)
+    const row = botao.closest("tr");
+    if (row) {
+      const inputDesktop = row.querySelector(".valor-input-desktop");
+      if (inputDesktop && inputDesktop.value.trim() !== "") {
+        valorPersonalizado = inputDesktop.value.trim();
+      }
+    }
   }
 
+  // Data/hora atual
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
   const mes = String(agora.getMonth() + 1).padStart(2, "0");
@@ -334,11 +345,10 @@ function compartilharWhatsApp(item, botao = null) {
 ${item.veiculo}
 ---------------------
 `;
-
   if (valorPersonalizado !== "") {
     msg += `*ADESÃO*
 • no ato da contratação
-💵R$ ${formatarValor(valorPersonalizado)}\n`;
+💵R$ ${formatarValor(valorPersonalizado)}`;
   }
   msg +=
 `
