@@ -333,17 +333,23 @@ function compartilharWhatsApp(item, botao = null) {
 `${icone}
 ${item.veiculo}
 -----------------------
-*Mensalidade:* R$ ${formatarValor(item.mensalidade)}
-*Marca:* ${item.marca}
-*Tipo:* ${item.tipo}
 `;
 
   if (valorPersonalizado !== "") {
-    msg += `*Valor informado:* R$ ${formatarValor(valorPersonalizado)}\n`;
+    msg += `*ADESÃO*
+• no ato da contratação
+💵R$ ${formatarValor(valorPersonalizado)}\n`;
   }
 
   msg +=
-`-----------------------
+`
+*MENSALIDADE*
+• após 30 dias da contratação
+💵 R$ ${formatarValor(item.mensalidade)}
+
+*Marca:* ${item.marca}
+*Tipo:* ${item.tipo}
+-----------------------
 Consulta realizada no dia:
 ${dataHora}`;
 
