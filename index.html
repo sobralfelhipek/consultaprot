@@ -304,11 +304,22 @@
       }
     }
 
-function compartilharWhatsApp(item) {
+function compartilharWhatsApp(item, botao = null) {
   const tipo = (item.tipo || "").toString().toLowerCase();
   const icone = tipo === "carro" ? "🚗" : tipo === "moto" ? "🏍️" : "";
 
-  // Gera data/hora atual
+  // pega o valor preenchido no card (se houver)
+  let valorPersonalizado = "";
+  if (botao) {
+    const card = botao.closest(".card");
+    if (card) {
+      const inputValor = card.querySelector(".valor-input");
+      if (inputValor && inputValor.value.trim() !== "") {
+        valorPersonalizado = inputValor.value.trim();
+      }
+    }
+  }
+
   const agora = new Date();
   const dia = String(agora.getDate()).padStart(2, "0");
   const mes = String(agora.getMonth() + 1).padStart(2, "0");
@@ -318,21 +329,27 @@ function compartilharWhatsApp(item) {
 
   const dataHora = `${dia}/${mes}/${ano} - ${hora}:${min}`;
 
-  const msg =
+  let msg =
 `${icone}
 ${item.veiculo}
 -----------------------
 *Mensalidade:* R$ ${formatarValor(item.mensalidade)}
 *Marca:* ${item.marca}
 *Tipo:* ${item.tipo}
------------------------
+`;
+
+  if (valorPersonalizado !== "") {
+    msg += `*Valor informado:* R$ ${formatarValor(valorPersonalizado)}\n`;
+  }
+
+  msg +=
+`-----------------------
 Consulta realizada no dia:
 ${dataHora}`;
 
   const link = "https://wa.me/?text=" + encodeURIComponent(msg);
   window.open(link, "_blank");
 }
-
     async function buscar() {
       const campoBusca = document.getElementById("busca");
       const termoRaw = campoBusca.value || "";
@@ -429,9 +446,18 @@ ${dataHora}`;
               <p><strong>Franquia:</strong> <span id="franquia-${idx}" data-real="${franquia}" data-visible="false">••••••</span></p>
               <p><strong>Marca:</strong> ${marca}</p>
               <p><strong>Tipo:</strong> ${tipo}</p>
-              <div class="btn-row">
+
+<!-- CAMPO VALOR PERSONALIZADO -->
+<div class="campo-valor">
+  <label style="color:#ffd700; font-weight:bold;">Adesão::</label>
+  <input type="number" class="valor-input" placeholder="Valor adesão cobrado"
+         style="width:100%; padding:6px; border-radius:6px; border:none; margin-top:6px;">
+</div>
+
+<div class="btn-row">
                 <button id="toggle-card-${idx}" class="btn-toggle" onclick="toggleFranquia(${idx})">👁️ Mostrar</button>
-                <button class="btn-whatsapp btn-whatsapp-mobile" onclick='compartilharWhatsApp(${JSON.stringify(item).replaceAll("'", "\\'")})'>
+                <button class="btn-whatsapp btn-whatsapp-mobile"
+        onclick='compartilharWhatsApp(${JSON.stringify(item).replaceAll("'", "\\'")}, this)'>
 <img src="https://img.icons8.com/?size=512&id=16713&format=png" width="26">
 </button>
               </div>
