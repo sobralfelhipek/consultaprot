@@ -409,6 +409,7 @@ ${dataHora}`;
                 <th>FRANQUIA (R$)</th>
                 <th>MARCA</th>
                 <th>TIPO</th>
+                <th>ADESÃO</th>
                 <th></th>
               </tr>
             </thead>
@@ -437,10 +438,21 @@ ${dataHora}`;
                   <button id="toggle-desk-${idx}" class="toggle-franquia-btn" onclick="toggleFranquia(${idx})">Mostrar</button>
               </td>
               <td>${marca}</td>
-              <td>${tipo}</td>
-              <td><button class="share-icon-btn" title="Compartilhar" onclick='compartilharWhatsApp(${JSON.stringify(item).replaceAll("'", "\\'")})'>
-  <img src="https://img.icons8.com/?size=512&id=16713&format=png" width="26">
-</button></td>
+             <td>${tipo}</td>
+
+<!-- CAMPO DE VALOR NO DESKTOP -->
+<td style="text-align:center;">
+  <input type="number" class="valor-input-desktop"
+         placeholder="Valor"
+         style="width:90px; padding:4px; border-radius:6px; border:none;">
+</td>
+
+<td>
+  <button class="share-icon-btn" title="Compartilhar"
+    onclick='compartilharWhatsApp(${JSON.stringify(item).replaceAll("'", "\\'")}, this)'>
+    <img src="https://img.icons8.com/?size=512&id=16713&format=png" width="26">
+  </button>
+</td>
             </tr>
           `;
 
