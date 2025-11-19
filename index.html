@@ -332,7 +332,7 @@ function compartilharWhatsApp(item, botao = null) {
   let msg =
 `${icone}
 ${item.veiculo}
--------------------------------
+---------------------
 `;
 
   if (valorPersonalizado !== "") {
@@ -343,14 +343,14 @@ ${item.veiculo}
 
   msg +=
 `
--------------------------------
+---------------------
 *MENSALIDADE*
 • após 30 dias da contratação
 💵 R$ ${formatarValor(item.mensalidade)}
--------------------------------
+---------------------
 *Marca:* ${item.marca}
 *Tipo:* ${item.tipo}
--------------------------------
+---------------------
 Consulta realizada no dia:
 ${dataHora}`;
 
